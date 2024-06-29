@@ -1,9 +1,7 @@
 function Home() {
     return (
         <div>
-            <h1>Marjorie, te amo!</h1>
-
-            <p>Ass. Henrico.</p>
+            <h1>Marjorie, te amo!!!!!!</h1>
         </div>
     )
 }
