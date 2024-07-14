@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "npm run run-next-dev & npm run run-db",
-    "run-next-dev": "next dev",
-    "run-db": "docker compose -f infra/compose.yaml up -d",
+    "next-dev": "next dev",
+    "db": "docker compose -f infra/compose.yaml up -d",
     "stop-db": "docker compose -f infra/compose.yaml down",
     "lint:check": "prettier --check .",
     "lint:fix": "prettier --write .",
