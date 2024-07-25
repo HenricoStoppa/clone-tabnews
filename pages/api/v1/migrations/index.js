@@ -5,10 +5,6 @@ import database from "infra/database.js";
 export default async function migrations(request, response) {
   const dbClient = await database.getNewClient();
 
-  const firstResponse = await fetch("http://localhost:3000/api/v1/migrations", {
-    method: "DELETE",
-  });
-
   const defaultMigrationOptions = {
     dbClient: dbClient,
     dryRun: true,
