@@ -3,7 +3,7 @@ function Home() {
     <div>
       <h1>Teste...</h1>
 
-      <p>Feito por Henrico Stoppa</p>
+      <p>Feito por Emilio Haro</p>
     </div>
   );
 }
