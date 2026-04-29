@@ -1,6 +1,7 @@
 import database from "infra/database.js";
 import email from "infra/email.js";
 import webserver from "infra/webserver.js";
+import { NotFoundError } from "infra/errors.js";
 
 const EXPIRATION_IN_MILLISECONDS = 60 * 15 * 1000; // 15 minutes
 
@@ -42,12 +43,12 @@ Equipe Clonetabs.
   });
 }
 
-async function findOneByUserId(userId) {
-  const tokenFound = await runSelectQuery(userId);
+async function findOneValidByToken(token) {
+  const activationTokenFound = await runSelectQuery(token);
 
-  return tokenFound;
+  return activationTokenFound;
 
-  async function runSelectQuery(userId) {
+  async function runSelectQuery(token) {
     const results = await database.query({
       text: `
         SELECT
@@ -55,12 +56,21 @@ async function findOneByUserId(userId) {
         FROM
           user_activation_tokens
         WHERE
-          user_id = $1
+          id = $1
+          AND used_at IS NULL
+          AND expires_at > NOW()
         LIMIT
           1
-        ;`,
-      values: [userId],
+      ;`,
+      values: [token],
     });
+
+    if (results.rowCount === 0) {
+      throw new NotFoundError({
+        message: "O token não foi encontrado ou expirou.",
+        action: "Faça um novo cadastro.",
+      });
+    }
 
     return results.rows[0];
   }
@@ -69,7 +79,7 @@ async function findOneByUserId(userId) {
 const activation = {
   create,
   sendEmailToUser,
-  findOneByUserId,
+  findOneValidByToken,
 };
 
 export default activation;
