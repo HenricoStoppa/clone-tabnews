@@ -2,12 +2,12 @@ import database from "infra/database.js";
 import password from "models/password.js";
 import { ValidationError, NotFoundError } from "infra/errors.js";
 
-async function findOneById(tokenId) {
-  const userFound = await runSelectQuery(tokenId);
+async function findOneById(userId) {
+  const userFound = await runSelectQuery(userId);
 
   return userFound;
 
-  async function runSelectQuery(tokenId) {
+  async function runSelectQuery(userId) {
     const results = await database.query({
       text: `
         SELECT
@@ -19,7 +19,7 @@ async function findOneById(tokenId) {
         LIMIT
           1
         ;`,
-      values: [tokenId],
+      values: [userId],
     });
 
     if (results.rowCount === 0) {
