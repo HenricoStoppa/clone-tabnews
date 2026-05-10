@@ -7,6 +7,10 @@ import user from "models/user.js";
 import session from "models/session.js";
 import activation from "models/activation.js";
 
+const fs = require("fs");
+import { resolve } from "node:path";
+const { execSync } = require("node:child_process");
+
 const emailHttpUrl = `http://${process.env.EMAIL_HTTP_HOST}:${process.env.EMAIL_HTTP_PORT}`;
 
 async function waitForAllServices() {
@@ -100,6 +104,32 @@ async function addFeaturesToUser(userObject, features) {
   return updatedUser;
 }
 
+function createDummyMigration() {
+  execSync("npm run migrations:create -- dummy migration");
+}
+
+function deleteDummyMigration() {
+  const folderPath = resolve(__dirname, "../infra/migrations");
+  fs.readdir(folderPath, (err, files) => {
+    if (err) {
+      console.error("Erro ao ler pasta:", err);
+      return;
+    }
+    const lastFileFound = files[files.length - 1];
+    const completePath = resolve(folderPath, lastFileFound);
+    if (!lastFileFound.endsWith("dummy-migration.js")) {
+      console.error("Erro ao encontrar arquivo.");
+      return;
+    }
+
+    fs.unlink(completePath, (err) => {
+      if (err) {
+        console.error("Erro ao excluir arquivo:", err);
+      }
+    });
+  });
+}
+
 const orchestrator = {
   waitForAllServices,
   clearDatabase,
@@ -110,6 +140,8 @@ const orchestrator = {
   getLastEmail,
   activateUser,
   addFeaturesToUser,
+  createDummyMigration,
+  deleteDummyMigration,
 };
 
 export default orchestrator;
