@@ -1,4 +1,5 @@
 import orchestrator from "tests/orchestrator.js";
+import webserver from "infra/webserver.js";
 
 beforeAll(async () => {
   await orchestrator.waitForAllServices();
@@ -15,7 +16,7 @@ describe("POST /api/v1/migrations", () => {
   describe("Anonymous user", () => {
     test("Trying to run pending migrations", async () => {
       const firstResponse = await fetch(
-        "http://localhost:3000/api/v1/migrations",
+        `${webserver.origin}/api/v1/migrations`,
         {
           method: "POST",
         },
@@ -40,7 +41,7 @@ describe("POST /api/v1/migrations", () => {
       const sessionObject = await orchestrator.createSession(user.id);
 
       const firstResponse = await fetch(
-        "http://localhost:3000/api/v1/migrations",
+        `${webserver.origin}/api/v1/migrations`,
         {
           method: "POST",
           headers: {
@@ -73,7 +74,7 @@ describe("POST /api/v1/migrations", () => {
         sessionObject = await orchestrator.createSession(user.id);
 
         const firstResponse = await fetch(
-          "http://localhost:3000/api/v1/migrations",
+          `${webserver.origin}/api/v1/migrations`,
           {
             method: "POST",
             headers: {
@@ -90,7 +91,7 @@ describe("POST /api/v1/migrations", () => {
 
       test("For the second time", async () => {
         const SecondResponse = await fetch(
-          "http://localhost:3000/api/v1/migrations",
+          `${webserver.origin}/api/v1/migrations`,
           {
             method: "POST",
             headers: {
