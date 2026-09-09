@@ -5,6 +5,11 @@ import database from "infra/database";
 import migrator from "models/migrator.js";
 import user from "models/user.js";
 import session from "models/session.js";
+import activation from "models/activation.js";
+
+const fs = require("fs");
+import { resolve } from "node:path";
+const { execSync } = require("node:child_process");
 
 const emailHttpUrl = `http://${process.env.EMAIL_HTTP_HOST}:${process.env.EMAIL_HTTP_PORT}`;
 
@@ -74,6 +79,11 @@ async function getLastEmail() {
   const emailListResponse = await fetch(`${emailHttpUrl}/messages`);
   const emailListBody = await emailListResponse.json();
   const lastEmailItem = emailListBody.pop();
+
+  if (!lastEmailItem) {
+    return null;
+  }
+
   const emailTextResponse = await fetch(
     `${emailHttpUrl}/messages/${lastEmailItem.id}.plain`,
   );
@@ -84,6 +94,42 @@ async function getLastEmail() {
   return lastEmailItem;
 }
 
+async function activateUser(user) {
+  return await activation.activateUserById(user.id);
+}
+
+async function addFeaturesToUser(userObject, features) {
+  const updatedUser = await user.addFeatures(userObject.id, features);
+
+  return updatedUser;
+}
+
+function createDummyMigration() {
+  execSync("npm run migrations:create -- dummy migration");
+}
+
+function deleteDummyMigration() {
+  const folderPath = resolve(__dirname, "../infra/migrations");
+  fs.readdir(folderPath, (err, files) => {
+    if (err) {
+      console.error("Erro ao ler pasta:", err);
+      return;
+    }
+    const lastFileFound = files[files.length - 1];
+    const completePath = resolve(folderPath, lastFileFound);
+    if (!lastFileFound.endsWith("dummy-migration.js")) {
+      console.error("Erro ao encontrar arquivo.");
+      return;
+    }
+
+    fs.unlink(completePath, (err) => {
+      if (err) {
+        console.error("Erro ao excluir arquivo:", err);
+      }
+    });
+  });
+}
+
 const orchestrator = {
   waitForAllServices,
   clearDatabase,
@@ -92,6 +138,10 @@ const orchestrator = {
   createSession,
   deleteAllEmail,
   getLastEmail,
+  activateUser,
+  addFeaturesToUser,
+  createDummyMigration,
+  deleteDummyMigration,
 };
 
 export default orchestrator;
